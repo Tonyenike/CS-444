@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+\usepackage{times}
+\usepackage{cite}
+\usepackage[utf8]{inputenc}
+%this is a comment
+\title{Vision statement - Textbook merchant application}
+\author{Jesse Chick \& Benjamin Martin}
+
+
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\section{Problem}
+\par Every term, thousands of OSU students are dismayed by the often high prices they pay at the Beaver Store for their prescribed textbooks. In addition to an unappealing sticker price, students experience the latent annoyance at the conclusion of each ten week term when they are faced with a stack of expensive, glossy, barely touched books for which they have no concrete use. 
+\par Regardless of the monetary and material waste, blasphemous to anyone concerned with preserving something resembling frugality in a hopelessly consumerist culture, the facility for the undesirable situation faced by current students is not difficult to pin down. In acquiring textbooks, students are limited to a few main sources: online retailers, the publisher itself, and the good ol’ Beaver Store. The latter has the advantage of providing buyers with a physical specimen which is guaranteed to be the correct book for the class and of the correct edition. The buyer experiences the immediacy of walking out of the store with their merchandise in hand, as opposed to an indefinite shipping period. In lieu of the aggressive savvy to get my textbooks through a less expensive (and thus less accessible) mean, I myself succumb to the convenience of the Beaver Store’s offerings, with predictable frustrations. And I am by no means the only one in this boat.
+
+
+
+
+\section{Proposed Solution}
+\par We propose a solution which begins to solve the issue of high cost and the waste of a perfectly good textbook: a mobile application which allows users (OSU students) to buy and sell used textbooks. Our users will be able to enter essential information regarding their used textbooks (title, ISBN, a price of their choosing) with additional optional fields (edition, publisher, associated course(s)), which will be viewable to all other users. Users can search for textbooks by ISBN, compare prices, and connect with the owners of the book they wish to purchase. 
+\par Our application will inherently promote more affordable prices for textbooks because in order to be able to sell a textbook through the app, a textbook owner will have to name a price substantially below the Beaver Store asking price. Likewise, this asking price must be higher than what they would get by selling it back to the Beaver Store for it to be worth the seller’s time. This means that the prices of textbooks on our app will be somewhere in between the Beaver Store price of the textbook and the amount the Beaver Store is willing to buy the book back for. Everyone wins: the seller gets more money for their textbook than they would have otherwise, and the buyer pays a lower price than they would buying through usual means. These benefits will encourage students to pass on their old textbooks rather than allowing them to accumulate dust on a bookshelf, meaning that, collectively, OSU students will be able to get more more learning out of less printed paper. 
+\par What separates this from Craigslist or similar resources is its exclusivity. This application, at least at its conception, will be for OSU students only (they will be required login with a valid OSU email) which we hope will foster a welcoming, safe user experience. Similarly, our application has the benefit of exclusively marketing textbooks and academic media, so it is more likely that customers will be able to find what they are looking for if it is listed. 
+\par This project will take the form of a mobile application. In order to do everything outlined above, we will need several cellular devices for testing, as well a database in which to store textbook information and a server of some description to serve such information. The markup language- and scripting skills required to build an attractive, functional application are taught in CS290. 
+
+
+\section{Limitations}
+\par A key limitation in our proposal is that it will be difficult (if possible, given time constraints) to achieve a strong standards when it comes to verifying valid OSU emails. Checking for the presence of “@oregonstate.edu” in the input is a good start, but we will have to attempt to connect with that email in some way to ensure that it exists, a process which we have no concrete knowledge of at the present time, though it does not seem the least bit infeasible. The biggest limitation that we see will be accessing the beaver store prices, which is only a goal that we hope to see if the time of the project is lengthened for the developers as this task would be harder to complete. As with any project, making sure that this specific section is bug-free could also be a pain because there are many communication “links”, or areas where the app could fall apart or break on the user. Each area could present a problem:
+\begin{enumerate}
+\item Establishing a connection with the beaver store
+\item Retrieving information from the beaver store
+\item Moving the information from the database to the client side
+\item Displaying the information on the client side.
+\end{enumerate}
+\par In each of these areas arises a potential issue or bug that could hinder the developer. Since both the complexity and the scale of  this task is so large, we consider this portion of the project to be the limitation (and also not suitable for a 10 week project). Establishing these connections in general would also be a huge limitation because it requires a team of developers with members that know how to both code server-side stuff (mongoDB, socket.io) as well as client-side interface (ios interface, css). This means that multiple specialty areas of expertise are required for this project. Because of the high specialization that is required in order to fulfill this project, the connection task (and in specific; connecting to the OSU beaver store) would be the hardest tasks to accomplish for the developers. 
+\par This project is also limited by the power of the server that the project is built on. Since this application requires a server-side computer in order for the application to effectively communicate between textbook buyers and sellers, the server that this application runs on is also a limiting factor for the runtime efficiency of the project. A weak server (a co-worker’s laptop, for instance) would likely not be able to process all of Oregon State for textbook buying and selling. The hardware requirements for this project will only grow as the number of users for the applications grow. If we anticipate (theoretically) that 10\% of the Oregon State students will download this application over the course of 1 year, that would be approximately 3,000 users per year in increased usage. The hardware issue would mostly be an issue of cost, and not an issue of developer time nor developer resource management.
+The other limitation would be support and maintenance. In order to entice continued usage of the application, we must provide support and updates to the software as the ios updates in order to maximize the client side usability and ease of access. Providing patch updates to fix bugs with certain mobile phone types or new security protocols is essential to ensuring the success of the application. Without maintenance on these key pieces of the project, the application can be exposed or vulnerable to hacking or exploitation. By keeping the app bug-free and secure, we can ensure that our product is robust and usable.
+
+
+\section{Conclusion}
+This application would help make textbook buying more accessible and affordable for college students, and in specific, students at Oregon State University. By connecting students across campus and using class information to find textbooks at cheaper prices, this application can revolutionize the textbook industry by giving the students the power to find cheaper prices for the books that they need.
+
+\cite{bookhuff}
+\cite{booknbc}
+
+\bibliography{myref}
+\bibliographystyle{plain}
+
+\end{document}
