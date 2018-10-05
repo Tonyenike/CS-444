@@ -10,10 +10,10 @@ bib: bib
 
 dvi: ${TARGET}.tex 
 #	run latex twice to get references correct
-	latex ${TARGET}.tex
+	latex ${TARGET}.tex > logfile
 #	you can also have a bibtex line here
-	bibtex $(TARGET)
-	latex $(TARGET).tex
+	bibtex $(TARGET) > logfile
+	latex $(TARGET).tex > logfile
 
 ps: dvi
 	dvips -R -Poutline -t letter ${TARGET}.dvi -o ${TARGET}.ps
@@ -27,6 +27,7 @@ clean-dvi:
 	rm -f ${TARGET}.dvi
 	rm -f ${TARGET}.out
 	rm -f ${TARGET}.toc
+	rm -f logfile
 
 clean-ps: clean-dvi
 	rm -f ${TARGET}.ps
@@ -38,6 +39,3 @@ clean-pdf: clean-ps
 
 
 clean: clean-pdf
-
-
-
