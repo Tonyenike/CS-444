@@ -8,8 +8,9 @@ default: pdf
 bib: bib
 	bibtex ${TARGET}
 
-dvi: ${TARGET}.tex 
+dvi: ${TARGET}.tex
 #	run latex twice to get references correct
+	# ./latex-git-log --lang=en > table.tex
 	latex ${TARGET}.tex
 #	you can also have a bibtex line here
 #	bibtex $(TARGET)
@@ -36,6 +37,6 @@ clean-pdf: clean-ps
 	rm -f ${TARGET}.bbl
 	rm -f ${TARGET}.blg
 	rm -f ${TARGET}.pdf
-
+	# rm -f table.tex
 
 clean: clean-pdf

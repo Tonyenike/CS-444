@@ -1,36 +1,122 @@
-\documentclass[10pt]{article}
+\documentclass[10pt,english]{article}
 \usepackage{times}
 \usepackage{cite}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{longtable, hyperref}
+\usepackage{listings}
+\usepackage[margin = .75 in]{geometry}
 \usepackage[utf8]{inputenc}
+\newcommand{\longtableendfoot}{Please continue at the next page}
 %this is a comment
 \title{Assignment 1 - Getting acquainted \& Concurrency}
-\author{Nickoli Londura \& Benjamin Martin - Group 7}
+\author{Nickoli Londura \& Benjamin Martin - Group 7 \\ Fall 2018 \\ CS 444 \\ Oregon State University}
 
 
-
+% [language=C]
 
 \begin{document}
 \maketitle
-\tableofcontents
+% \tableofcontents
 
+\begin{abstract}
+
+\noindent This is the assignment 1 write-up for group 7 of CS 444. This assignment combines the "Getting acquainted" section and "concurrency" sections on Canvas. We explore how to build a kernel and run a VM on it on the OS2 server, and we review how to run concurrent threads and apply mutual exclusion (mutexes) on the threads that need to use shared resources.
+
+\end{abstract}
+
+\newpage
 
 
 \section{Step-by-step walkthrough}
-\par This is how we were able to run the VM on our OWN built kernel.
+\par This is how we were able to run the VM on our own built kernel.
 
 \begin{enumerate}
-\item Type \begin{verbatim} mkdir group7 \end{verbatim}  in the \begin{verbatim} /scratch/fall2018 \end{verbatim} folder on the os2 server.
+\item Type \begin{verbatim} mkdir group7 \end{verbatim}  in the \begin{verbatim} /scratch/fall2018 \end{verbatim} folder on the os2 server. For the TA grading this, you may type \begin{verbatim} mkdir spoofgroup \end{verbatim} instead so that you don't overwrite our folder!
 \item Move into the group 7 directory by typing \begin{verbatim} cd group7 \end{verbatim}
-\item In this directory, obtain the linux-yocto by typing \begin{verbatim} git clone \end{verbatim}
+\item In this directory, obtain the linux-yocto by typing \begin{verbatim} git clone git://git.yoctoproject.org/linux-yocto-3.19 \end{verbatim}
+\item Move into the new linux-yocto directory. \begin{verbatim} cd linux-yocto-3.19 \end{verbatim}
+\item Change the version by typing \begin{verbatim} git checkout tags/v3.19.2 \end{verbatim}
+\item Copy the following files into the current folder using the cp command:
+\begin{verbatim} cp -f /scratch/files/environment-setup-i586-poky-linux ./ \end{verbatim} 
+\begin{verbatim} cp -f /scratch/files/environment-setup-i586-poky-linux.csh ./ \end{verbatim}
+\begin{verbatim} cp -f /scratch/files/config-3.19.2-yocto-standard ./ \end{verbatim}
+\begin{verbatim} cp -f /scratch/files/core-image-lsb-sdk-qemux86.ext4 ./ \end{verbatim}
+\item Rename the config file
+\begin{verbatim} mv -f ./config-3.19.2-yocto-standard ./.config \end{verbatim}
+\item Build the kernel.
+\begin{verbatim} make -j4 all \end{verbatim}
+\item Source the environment files (do both just in case)
+\begin{verbatim} source environment-setup-i586-poky-linux \end{verbatim}
+\begin{verbatim} source environment-setup-i586-poky-linux.csh \end{verbatim}
+\item Start the VM on our newly built kernel. We are group 7, so our port number was 5507.
+\begin{verbatim}
+qemu-system-i386 -gdb tcp::5507 -S -nographic -kernel ./arch/i386/boot/bzImage 
 
+-drive file=core-image-lsb-sdk-qemux86.ext4,if=virtio -enable-kvm 
+
+-net none -usb -localtime --no-reboot 
+
+--append "root=/dev/vda rw console=ttyS0 debug"    \end{verbatim} 
+\item Start a new session on os2 WHILE KEEPING THIS CURRENT SESSION OPEN. I will assume that you know how to do this.
+\item On the new session, type \begin{verbatim} gdb \end{verbatim}
+\item Connect to the kernel, type \begin{verbatim} target remote localhost:5507 \end{verbatim}
+\item Finish kernel boot-up, type \begin{verbatim} continue \end{verbatim}
+\item Switch back to original session. Login with credentials (root and no password)
+\item We are running the VM on our built kernel. Finished. Type \begin{verbatim} reboot \end{verbatim} to get out of there.
+\item To test only the VM on the prebuilt kernel, type
+
+\begin{verbatim}
+qemu-system-i386 -gdb tcp::5507 -S -nographic -kernel bzImage-qemux86.bin 
+
+-drive file=core-image-lsb-sdk-qemux86.ext4,if=virtio -enable-kvm 
+
+-net none -usb -localtime --no-reboot 
+
+--append "root=/dev/vda rw console=ttyS0 debug"    \end{verbatim} 
 \end{enumerate}
 
+\section{qemu flags definitions}
 
 
-\section{Proposed Solution}
+-gdb: Debug Mode                          \\
+-S: Manual CPU Start                      \\
+-nographic: Disable Graphics              \\
+-kernel: Kernel File                      \\
+-drive: Generic Drive                     \\
+-enable-kvm: KVM Virtualization           \\
+-net: Network Options                     \\
+-usb: Enable USB                          \\
+-localtime: Sets the real time clock (RTC) to local. Been replaced with -rtc [options] \\
+--no-reboot: No Reboot                                                                 \\
+--append: Command Line Parameter                                                       \\
 
-\section{Limitations}
+\section{Concurrency Questions}
 
-\section{Conclusion}
+\textbf{1. What do you think the main point of this assignment is?}
+Review concurrency in C and learn a little bit about OS random number generation. This helps us get familiar with operations of the OS and how they are coded in C. This exploratory project helped us have a deeper understanding of the essential properties of the C language for concurrency problems. C really makes things easy to implement with the mutex. \\
+
+
+\noindent \textbf{2. How did you personally approach the problem? Design decisions, algorithm, etc.}
+Solved the problem by function. Sort the task into producer versus consumer. The buffer array was implemented as a dynamic array which was a queue (FIFO). Mutex locks were placed around anytime the buffer data was accessed or modified (which covered a majority of the producer and consumer function).  \\
+
+
+\noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
+Debugging was lots and lots of trace statements. It's how we debug all our projects in CS because we are pros. We also checked wait time outputs to ensure they were in range and checked mutex locks by commenting out unlock lines to see that the code would halt. This ensures that the buffer is being locked by the threads.\\
+
+
+\noindent \textbf{4. What did you learn?}
+Re-learned how to use mutex and create threads in C. This stuff is mostly review from OS1, since we had covered thread creation and mutual exclusion in OS1. Ben Brewster did a good job. We learned about random number generation, such as the Mersene Twister and the rdrand call.\\
+
+
+\section{Version Control Log}
+
+\input{table.tex}
+
+\section{Work log}
+
+
+The majority of the project was completed on the due date (Monday, October 15, 2018). We saved the writeup and the coding for the producer/consumer problem for today. That made our work log real spicy for the final day. Nickoli did more of the work for the write-up and Ben did most of the coding for the prodcer/consumer problem. This worked out really well because Ben hates writing. Our group will continue this work pattern in the future. 
+
 
 \end{document}

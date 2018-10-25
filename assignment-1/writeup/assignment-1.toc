@@ -1,4 +1,0 @@
-\contentsline {section}{\numberline {1}Step-by-step walkthrough}{1}
-\contentsline {section}{\numberline {2}Proposed Solution}{2}
-\contentsline {section}{\numberline {3}Limitations}{2}
-\contentsline {section}{\numberline {4}Conclusion}{2}
