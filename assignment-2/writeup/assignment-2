@@ -1,0 +1,36 @@
+\documentclass[10pt]{article}
+\usepackage{times}
+\usepackage{cite}
+\usepackage[utf8]{inputenc}
+%this is a comment
+\title{Assignment 2 - I/O Elevators & Concurrency 2}
+\author{Nickoli Londura \& Benjamin Martin - Group 7}
+
+
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\section{Step-by-step walkthrough}
+\par This is how we were able to run the VM on our OWN built kernel.
+
+\begin{enumerate}
+\item Type \begin{verbatim} mkdir group7 \end{verbatim}  in the \begin{verbatim} /scratch/fall2018 \end{verbatim} folder on the os2 server.
+\item Move into the group 7 directory by typing \begin{verbatim} cd group7 \end{verbatim}
+\item In this directory, obtain the linux-yocto by typing \begin{verbatim} git clone \end{verbatim}
+
+\end{enumerate}
+
+
+
+\section{Proposed Solution}
+
+\section{Limitations}
+
+\section{Conclusion}
+
+\end{document}
