@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage{color}
+\begin{document}
+
+{
+\let\XXegroup\relax
+\expandafter\def\csname XX[31\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{red}}
+\expandafter\def\csname XX[1;31\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{red}}
+\expandafter\def\csname XX[32\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{green}}
+\expandafter\def\csname XX[1;32\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{green}}
+\expandafter\def\csname XX[33\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{yellow}}
+\expandafter\def\csname XX[1;33\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{yellow}}
+\expandafter\def\csname XX[34\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{cyan}}
+\expandafter\def\csname XX[1;34\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{cyan}}
+\expandafter\def\csname XX[35\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{magenta}}
+\expandafter\def\csname XX[1;35\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{magenta}}
+\expandafter\def\csname XX[36\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{blue}}
+\expandafter\def\csname XX[1;36\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{blue}}
+
+
+\expandafter\def\csname XX[\endcsname{\XXegroup}
+\catcode`\^^[=13
+\def^^[#1m{%
+\expandafter\ifx\csname XX#1\endcsname\relax
+\typeout{XX#1}%
+\else
+\csname XX#1\endcsname
+\fi}
+\
+\begin{verbatim}
+
+
+
+
+* [33m9036481[m Mostly done?
+* [33m9ff7580[m made the writeup latex
+* [33ma87023f[m Finished concurrency project
+* [33me0c1360[m modified code
+* [33m50b0509[m Added writing and things
+* [33m35987c9[m Changed int in main and spaced code
+* [33m840df62[m Finished concurrency assignment
+* [33mb531010[m Added stuff
+* [33m0653991[m Added concurrency code
+*   [33mfa83ec1[m There we go
+[32m|[m[33m\[m  
+[32m|[m * [33m73e30d4[m Added assignment folders
+[32m|[m *   [33m7ed32fd[m Small change
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m * [33ma0d3169[m Create README.md
+* [34m|[m [33m809b2a4[m There
+* [34m|[m [33m12a5c01[m did it
+* [34m|[m [33ma6fc344[m There we go
+* [34m|[m [33m31f3570[m Reconfigured
+* [34m|[m [33mf61afcd[m Organized
+* [34m|[m [33m789c79d[m Added assignment folders
+* [34m|[m   [33m8b09933[m Small change
+[34m|[m[1;31m\[m [34m\[m  
+[34m|[m [1;31m|[m[34m/[m  
+[34m|[m[34m/[m[1;31m|[m   
+[34m|[m * [33m457cb43[m Create README.md
+* [33m57351b4[m Initial test
+
+
+\end{verbatim}

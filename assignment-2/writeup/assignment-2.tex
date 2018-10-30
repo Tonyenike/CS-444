@@ -7,7 +7,50 @@
 \usepackage{longtable, hyperref}
 \usepackage{listings}
 \usepackage[margin = .75 in]{geometry}
+\usepackage{color}
 \newcommand{\longtableendfoot}{Please continue at the next page}
+
+
+
+
+
+{
+\let\XXegroup\relax
+\expandafter\def\csname XX[31\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{red}}
+\expandafter\def\csname XX[1;31\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{red}}
+\expandafter\def\csname XX[32\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{green}}
+\expandafter\def\csname XX[1;32\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{green}}
+\expandafter\def\csname XX[33\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{yellow}}
+\expandafter\def\csname XX[1;33\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{yellow}}
+\expandafter\def\csname XX[34\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{cyan}}
+\expandafter\def\csname XX[1;34\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{cyan}}
+\expandafter\def\csname XX[35\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{magenta}}
+\expandafter\def\csname XX[1;35\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{magenta}}
+\expandafter\def\csname XX[36\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\color{blue}}
+\expandafter\def\csname XX[1;36\endcsname{%
+  \bgroup\let\XXegroup\egroup\leavevmode\bfseries\color{blue}}
+
+
+\expandafter\def\csname XX[\endcsname{\XXegroup}
+\catcode`\^^[=13
+\def^^[#1m{%
+\expandafter\ifx\csname XX#1\endcsname\relax
+\typeout{XX#1}%
+\else
+\csname XX#1\endcsname
+\fi}
+
 %this is a comment
 \title{Assignment 2 - I/O Elevators \& Concurrency 2}
 \author{Nickoli Londura \& Benjamin Martin - Group 7 \\ Fall 2018 \\ CS 444 \\ Oregon State University}
@@ -74,7 +117,8 @@ We got more practice using mutexes and creating threads in C. We learned more on
 
 \section{Version Control Log}
 
-\input{table.tex}
+\include{table.tex}
+
 
 \section{Work log}
 
