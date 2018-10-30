@@ -5,7 +5,8 @@
 # Modules and pragmas {{{
 use strict;
 use warnings;
-use autodie;
+#use autodie;
+#use autodie;
 use feature qw(say);
 use utf8;
 use open qw(:std :utf8);
@@ -94,7 +95,7 @@ say '\begin{tabular}{lp{12cm}}
 
 \bigskip
 
-% \iflanguage{ngerman}{\shorthandoff{"}}{}';
+\iflanguage{ngerman}{\shorthandoff{"}}{}';
 
 if ($print_author) {
     say "\\begin{longtable}{|rllllrrr|}";
@@ -186,7 +187,7 @@ for (@lines) {
     next if /\A\Z/xms;
     chomp;
     if ($which_line) {
-    #    s/\A([0-9a-f]{40})\s//xms or die "Did not match the commit hash\n";
+        # s/\A([0-9a-f]{40})\s//xms or die "Did not match the commit hash\n";
         my $tags = exists $commit_tags{$1} ? $commit_tags{$1} : q();
         my $date_author = '';
         my $c_msg;
@@ -206,9 +207,9 @@ for (@lines) {
         }
         else {
             $c_msg = latex_escape($c_msg);
-       }
-       say "\\hline $commit_count & $tags & $date_author $c_msg & " . join( ' & ', @changes ) . ' \\\\';
-       $commit_count++;
+        }
+        say "\\hline $commit_count & $tags & $date_author $c_msg & " . join( ' & ', @changes ) . ' \\\\';
+        $commit_count++;
     } ## end if ($which_line)
     else {
         @changes = ( 0, 0, 0 );

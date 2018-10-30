@@ -1,16 +1,17 @@
-\documentclass[10pt,english]{IEEEtran}
+\documentclass[10pt,a4paper,article]{article}
 \usepackage{times}
 \usepackage{cite}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{longtable, hyperref}
 \usepackage{listings}
 \usepackage[margin = .75 in]{geometry}
-\usepackage[utf8]{inputenc}
 \newcommand{\longtableendfoot}{Please continue at the next page}
 %this is a comment
 \title{Assignment 2 - I/O Elevators \& Concurrency 2}
 \author{Nickoli Londura \& Benjamin Martin - Group 7 \\ Fall 2018 \\ CS 444 \\ Oregon State University}
+
 
 
 % [language=C]
@@ -31,19 +32,30 @@
 \subsection{I/O Elevators}
 
 \textbf{1. What do you think the main point of this assignment is?}
-The main point is to understand how Linux kernel schedulers are implemented. By looking into LOOK and C-LOOK I/O schedulers, we were able to learn what kind of algorithms they use in order to execute processes in a distinct order.  \\
+The main point is to understand how Linux kernel schedulers are implemented. By looking into LOOK and C-LOOK I/O schedulers, we were able to learn what kind of algorithms they use in order to execute processes in a distinct order for reading and writing to the hard drive. \\
 
 
 \noindent \textbf{2. How did your team approach the problem? Design decisions, algorithm, etc.}
-  \\
+We implemented the C-LOOK scheduler, but DONT BE DECEIVED! Everything says look, but we really mean clook. This was for ease of viewing on our own part. The C-look was easier to implement because we could just have the "elevator" run up and then reset back at the bottom once it has dispatched the uppermost request.   \\
 
 
 \noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
-We started out by using print statements to see if the kernel was built and running properly, as well as knowing how the scheduler is adding and dispatching requests initially and at the end.  \\
+We started out by using print statements to see if the kernel was built and running properly, as well as knowing how the scheduler is adding and dispatching requests initially and at the end. We have a testing script, with a file named "yo", which was a test file with lorem ipsum text copied from here: \verb| https://loripsum.net/ | The test script was as follows: \begin{verbatim}
+#!/bin/bash
+
+i="1"
+
+while [ $i -lt 4 ]
+do
+cat yo > doy
+done
+\end{verbatim}
+It would run indefinitely until CTRL + C was hit.
+\\
 
 
 \noindent \textbf{4. What did you learn?}
-We learned what the algorithms are for LOOK and C-LOOK I/O schedulers that are used to implement them, and also learning a bit on how they are coded. In general, we were able to learn some more about the Linux kernel, as well as getting used to working with the kernel more.  \\
+We learned what the algorithms are for LOOK and C-LOOK I/O schedulers that are used to implement them, and also learning a bit on how they are coded. In general, we were able to learn some more about the Linux kernel, as well as getting used to working with the kernel more. We also learned about elevator algorithms and how they avoid the starvation problem, but are still more efficient than FIFO implementations. \\
 
 \subsection{Concurrency 2}
 
@@ -51,9 +63,8 @@ We learned what the algorithms are for LOOK and C-LOOK I/O schedulers that are u
 The main point was to solve a concurrency problem using a different algorithm from the last one but still using the idea of concurrency. Learning more about different concurrency algorithms will help us be more familiar with the OS. This project helped us see concurrency in a different way, while still being able to use the C language to implement it.  \\
 
 \noindent \textbf{2. How did your team approach the problem? Design decisions, algorithm, etc.}
-  \\
+This problem was initially tough because we had to ensure that philosophers would grab two forks simulatenously so that they all couldn't just grab one fork and lock each other out. This issue was resolved by having a "master" lock which would disable other philosophers from taking other forks (but they can still drop!) while a philosopher is grabbing forks.\\
 
-Solved the problem by function. Sort the task into producer versus consumer. The buffer array was implemented as a dynamic array which was a queue (FIFO). Mutex locks were placed around anytime the buffer data was accessed or modified (which covered a majority of the producer and consumer function).
 
 \noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
 Debugging was lots and lots of trace statements. Towards the end of the project, we had made a history and a table that would print out, showing the status of each thread and making sure the wait times are correct. We also checked mutex locks by commenting out unlock lines to see that the code would halt. This ensures that the resources are being locked by the threads.  \\
