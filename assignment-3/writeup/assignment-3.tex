@@ -1,0 +1,64 @@
+\documentclass[10pt,english]{article}
+\usepackage{times}
+\usepackage{cite}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{longtable, hyperref}
+\usepackage{listings}
+\usepackage[margin = .75 in]{geometry}
+\usepackage[utf8]{inputenc}
+\newcommand{\longtableendfoot}{Please continue at the next page}
+%this is a comment
+\title{Assignment 3 - Morse Code Blinky}
+\author{Nickoli Londura \& Benjamin Martin - Group 7 \\ Fall 2018 \\ CS 444 \\ Oregon State University}
+
+
+% [language=C]
+
+\begin{document}
+\maketitle
+% \tableofcontents
+
+\begin{abstract}
+
+\noindent This is the assignment 3 write-up for group 7 of CS 444. We explore how to build a kernel for the Raspberry PI on the os2 server, as well as learning how to modify the drivers for LEDS on the PI. Using morse code, we can make the LEDS present the string "hello," while still being able to change the speed at which they blink.
+
+\end{abstract}
+
+\newpage
+
+\section{Write Up}
+
+\textbf{1. What do you think the main point of this assignment is?}
+Being able to build a kernel for the Raspberry PI, and also being able to modify the LED driver to have them blink words in morse code. It is important to know how to create and modify drivers when working with kernels. \\
+
+\noindent \textbf{2. How did you personally approach the problem? Design decisions, algorithm, etc.}
+We took the contents from the heartbeat trigger and created our own trigger that uses morse code. We had to modify the Makefile and Kconfig in order to include our morse trigger when building the kernel. \\
+
+
+\noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
+We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function. When it came to testing if the LEDs are blinking correctly, we had to build the kernel every time to check and see if the morse code for the string "hello" was correct.\\
+
+
+\noindent \textbf{4. What did you learn?}
+We learned how to build a Raspberry PI kernel. We also learned how to modify the LED driver by adding a new trigger that controls how the LEDs blink. Specifically, we were able to create a morse code from the string "hello" and have the LEDs display it. We also learned how to have the user change the speed at which the LEDs blink. \\
+
+\nonindent \textbf{5. How should the TA evaluate your work? Provide detailed steps to prove correctness?}
+First, download the Raspbian OS by going to \verb|https://www.raspberrypi.org/downloads/raspbian/| and choosing "Raspbian Stretch Lite"
+Second, download Etcher by going to \verb|https://www.balena.io/etcher/| and choosing one for your OS
+Third, flash the Raspbian OS onto the SD card for the Raspberry PI using Etcher
+Forth, boot into the SD card from the Raspberry PI and add \verb|kernel=kernel8.img| and \verb|enable_uart=1| to the config.txt 
+Fifth, run the "builder" script to build the kernel
+Sixth, add the "kernel8.img" from the build to the SD card  \\
+
+\section{Version Control Log}
+
+\input{table.tex}
+
+\section{Work log}
+
+
+The majority of the project was completed on Thursday, November 8, 2018. We saved the writeup and the last bit of the coding for the day before the due date (Monday, November 12, 2018). Nickoli did most of the work for the write-up and Ben did most of the coding for LED driver. This worked out really well because Ben hates writing. Our group will continue this work pattern in the future. 
+
+
+\end{document}
