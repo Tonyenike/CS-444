@@ -33,23 +33,36 @@
 Being able to build a kernel for the Raspberry PI, and also being able to modify the LED driver to have them blink words in morse code. It is important to know how to create and modify drivers when working with kernels. \\
 
 \noindent \textbf{2. How did you personally approach the problem? Design decisions, algorithm, etc.}
-We took the contents from the heartbeat trigger and created our own trigger that uses morse code. We had to modify the Makefile and Kconfig in order to include our morse trigger when building the kernel. \\
+We took the contents from the heartbeat trigger and created our own trigger that uses morse code. We had to modify the Makefile and Kconfig in order to acommodate our morse trigger when building the kernel. We also had to create a file called \verb|ledtrig-morse.c| which was the morse trigger code itself.\\
 
 
 \noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
-We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function. When it came to testing if the LEDs are blinking correctly, we had to build the kernel every time to check and see if the morse code for the string "hello" was correct.\\
+We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function. When it came to testing if the LEDs are blinking correctly, we had to build the kernel every time to check and see if the morse code for the string "hello" was correct, and that speeds were reflected by changes requested to the SYSfs system.\\
 
 
 \noindent \textbf{4. What did you learn?}
 We learned how to build a Raspberry PI kernel. We also learned how to modify the LED driver by adding a new trigger that controls how the LEDs blink. Specifically, we were able to create a morse code from the string "hello" and have the LEDs display it. We also learned how to have the user change the speed at which the LEDs blink. \\
 
-\nonindent \textbf{5. How should the TA evaluate your work? Provide detailed steps to prove correctness?}
-First, download the Raspbian OS by going to \verb|https://www.raspberrypi.org/downloads/raspbian/| and choosing "Raspbian Stretch Lite"
-Second, download Etcher by going to \verb|https://www.balena.io/etcher/| and choosing one for your OS
-Third, flash the Raspbian OS onto the SD card for the Raspberry PI using Etcher
-Forth, boot into the SD card from the Raspberry PI and add \verb|kernel=kernel8.img| and \verb|enable_uart=1| to the config.txt 
-Fifth, run the "builder" script to build the kernel
-Sixth, add the "kernel8.img" from the build to the SD card  \\
+\noindent \textbf{5. How should the TA evaluate your work? Provide detailed steps to prove correctness.}
+\begin{enumerate}
+\item Download the Raspbian OS by going to \verb|https://www.raspberrypi.org/downloads/raspbian/| and choosing "Raspbian Stretch Lite"
+\item Download Etcher by going to \verb|https://www.balena.io/etcher/| and choosing one for your OS
+\item Flash the Raspbian OS onto the SD card for the Raspberry PI using Etcher
+\item Open the root directory of the SD card (by plugging it into its USB thingy and into your machine) and add \verb|kernel=kernel8.img| and \verb|enable_uart=1| to the config.txt file.
+\item Ensure that the "code" directory is in the same directory as the "linux" directory. If no linux directory exists, it will get created in the directory above the present working directory.
+\item Run the "builder" script to build and patch the kernel. If you get any prompts from the patcher, answer no ("n"). This means that you have previously built and are trying to build again, but the patcher will think to reverse the changes. 
+\item The image will be outside the linux directory (in the same directory as where "linux" and "code" are housed). It will be called "kernel8.img"
+\item Copy the "kernel8.img" to the SD card  \\
+\end{enumerate}
+
+Here is how we created the patches (but you DO NOT NEED TO DO THIS TO RUN OUR CODE!)
+\begin{enumerate}
+\item After finishing our work on the \verb|ledtrig-morse.c| file, we did \verb|diff -u ledtrig-heartbeat.c ledtrig-morse.c > morse.patch| to produce the \verb|morse.patch| file. 
+\item We made a copy of the Makefile (in the trigger directory) and called it Makefileold. We modified the Makefile as necessary. Then we did \verb|diff -u Makefileold Makefile > Makefile.patch| to produce the \verb|Makefile.patch| file.
+\item We made a copy of the Kconfig (in the trigger directory) and called it Kconfigold. We modified the Kconfig as necessary. Then we did \verb|diff -u Kconfigold Kconfig > Kconfig.patch| to produce the \verb|Kconfig.patch| file.
+\end{enumerate}
+
+
 
 \section{Version Control Log}
 
@@ -58,7 +71,6 @@ Sixth, add the "kernel8.img" from the build to the SD card  \\
 \section{Work log}
 
 
-The majority of the project was completed on Thursday, November 8, 2018. We saved the writeup and the last bit of the coding for the day before the due date (Monday, November 12, 2018). Nickoli did most of the work for the write-up and Ben did most of the coding for LED driver. This worked out really well because Ben hates writing. Our group will continue this work pattern in the future. 
-
+The majority of the project was completed on Thursday, November 8, 2018. We saved the writeup and the speed adjustments parameter portion for the day before the due date (Monday, November 12, 2018). Nickoli did most of the work for the write-up and Ben did most of the coding for LED driver. This worked out really well because Ben hates writing. Our group will continue this work pattern in the future. 
 
 \end{document}
