@@ -1,0 +1,76 @@
+\documentclass[10pt,english]{article}
+\usepackage{times}
+\usepackage{cite}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{longtable, hyperref}
+\usepackage{listings}
+\usepackage[margin = .75 in]{geometry}
+\usepackage[utf8]{inputenc}
+\newcommand{\longtableendfoot}{Please continue at the next page}
+%this is a comment
+\title{Assignment 4 - Morse Code Blinky Part 2}
+\author{Nickoli Londura \& Benjamin Martin - Group 7 \\ Fall 2018 \\ CS 444 \\ Oregon State University}
+
+
+% [language=C]
+
+\begin{document}
+\maketitle
+% \tableofcontents
+
+\begin{abstract}
+
+\noindent This is the assignment 4 write-up for group 7 of CS 444. We explore how to build a kernel for the Raspberry PI on the os2 server, as well as learning how to modify the drivers for LEDS on the PI. We can make the LEDS present any string in morse code, be able to change the speed at which they blink, and have the string blink once through or keep repeating.
+
+\end{abstract}
+
+\newpage
+
+\section{Write Up}
+
+\textbf{1. What do you think the main point of this assignment is?}
+Being able to build a kernel for the Raspberry PI, and also being able to modify the LED driver to have them blink words in morse code, be able to change the speed at which they blink, and have the string blink once through or keep repeating. It is important to know how to create and modify drivers when working with kernels. \\
+
+\noindent \textbf{2. How did you personally approach the problem? Design decisions, algorithm, etc.}
+We took the contents from the heartbeat trigger and created our own trigger that uses morse code. We had to modify the Makefile and Kconfig in order to acommodate our morse trigger when building the kernel. We also had to create a file called \verb|ledtrig-morse.c| which was the morse trigger code itself. \\
+
+
+\noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
+We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function, but later on we figured out how to. When it came to testing if the LEDs are blinking correctly, we had to build the kernel every time to check and see if the morse code for inputs strings was correct, as well as the speeds were reflected by changes requested to the SYSfs system, and the amount of times the string is being blinked were also reflected.\\
+
+
+\noindent \textbf{4. What did you learn?}
+We learned how to build a Raspberry PI kernel. Specifically, we were able to create a morse code from the any input string and have the LEDs display it. We also learned how to have the user change the speed at which the LEDs blink, as well as having the user change the amount of times the string is blinked. Another thing we learned was how to create a character device that allows any kind of input string to be blinked in morse code, rather than have a hardcoded one. \\
+
+\noindent \textbf{5. How should the TA evaluate your work? Provide detailed steps to prove correctness.}
+\begin{enumerate}
+\item Download the Raspbian OS by going to \verb|https://www.raspberrypi.org/downloads/raspbian/| and choosing "Raspbian Stretch Lite"
+\item Download Etcher by going to \verb|https://www.balena.io/etcher/| and choosing one for your OS
+\item Flash the Raspbian OS onto the SD card for the Raspberry PI using Etcher
+\item Open the root directory of the SD card (by plugging it into its USB thingy and into your machine) and add \verb|kernel=kernel8.img| and \verb|enable_uart=1| to the config.txt file.
+\item Ensure that the "code" directory is in the same directory as the "linux" directory. If no linux directory exists, it will get created in the directory above the present working directory.
+\item Run the "builder" script to build and patch the kernel. If you get any prompts from the patcher, answer no ("n"). This means that you have previously built and are trying to build again, but the patcher will think to reverse the changes. 
+\item The image will be outside the linux directory (in the same directory as where "linux" and "code" are housed). It will be called "kernel8.img"
+\item Copy the "kernel8.img" to the SD card \\
+\end{enumerate}
+
+Here is how we created the patches (but you DO NOT NEED TO DO THIS TO RUN OUR CODE!)
+\begin{enumerate}
+\item After finishing our work on the \verb|ledtrig-morse.c| file, we did \verb|diff -u ledtrig-heartbeat.c ledtrig-morse.c > morse.patch| to produce the \verb|morse.patch| file. 
+\item We made a copy of the Makefile (in the trigger directory) and called it Makefileold. We modified the Makefile as necessary. Then we did \verb|diff -u Makefileold Makefile > Makefile.patch| to produce the \verb|Makefile.patch| file.
+\item We made a copy of the Kconfig (in the trigger directory) and called it Kconfigold. We modified the Kconfig as necessary. Then we did \verb|diff -u Kconfigold Kconfig > Kconfig.patch| to produce the \verb|Kconfig.patch| file.
+\end{enumerate}
+
+
+
+\section{Version Control Log}
+
+\input{table.tex}
+
+\section{Work log}
+
+
+The majority of the project was completed on Tuesday, November 20, 2018. We saved the writeup and the character device portion on the due date (Monday, November 26, 2018). That made our work log real spicy for the ﬁnal day. Nickoli did most of the work for the write-up and Ben did most of the coding for LED driver. This worked out really well because Ben hates writing. Our group will continue this work pattern in the future. 
+
+\end{document}

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+
+YEET=${PWD}
+
+BASEDIR=$(dirname $0)
+
+BASEDIR="${BASEDIR:2}"
+
+cd linux
+cd ..
+
+
+#If the project is already cloned you can comment out the following line
+git clone --depth=1 -b rpi-4.14.y https://github.com/raspberrypi/linux.git
+
+
+cd linux
+
+chmod +777 ../ -R
+
+KERNEL=kernel8
+make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcmrpi3_defconfig
+make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
+
+rm -rf ./drivers/leds/trigger/ledtrig-morse.c
+
+patch ./drivers/leds/trigger/Kconfig ${YEET}/${BASEDIR}/Kconfig.patch
+patch ./drivers/leds/trigger/Makefile ${YEET}/${BASEDIR}/Makefile.patch
+patch ./drivers/leds/trigger/ledtrig-heartbeat.c -i ${YEET}/${BASEDIR}/morse.patch -o ./drivers/leds/trigger/ledtrig-morse.c
+
+KERNEL=kernel8
+make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
+
+chmod +777 ../ -R
+
+cp ./arch/arm64/boot/Image ../kernel8.img
