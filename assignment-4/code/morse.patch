@@ -1,5 +1,5 @@
---- test/ledtrig-heartbeat.c	2018-11-12 18:51:31.726944377 -0800
-+++ ledtrig-morse.c	2018-11-12 19:01:39.432613411 -0800
+--- ledtrig-heartbeat.c	2018-11-08 15:48:12.073613171 -0800
++++ ledtrig-morse.c	2018-11-26 23:03:21.181351659 -0800
 @@ -1,10 +1,13 @@
  /*
 - * LED Heartbeat Trigger
@@ -17,75 +17,130 @@
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of the GNU General Public License version 2 as
-@@ -22,23 +25,98 @@
+@@ -17,28 +20,253 @@
+ #include <linux/slab.h>
+ #include <linux/timer.h>
+ #include <linux/sched.h>
++#include <linux/cdev.h>
++#include <linux/uaccess.h>
++#include <linux/types.h>
++#include <linux/fs.h>
++#include <linux/device.h>
++#include <linux/version.h>
+ #include <linux/sched/loadavg.h>
+ #include <linux/leds.h>
  #include <linux/reboot.h>
  #include "../leds.h"
  
 -static int panic_heartbeats;
 +#define DEFAULT_TICK 250 // Default tick is 250ms
- 
--struct heartbeat_trig_data {
++#define FIRST_MINOR 0
++#define MINOR_CNT 1
++
 +static int panic_morses;
 +
-+char word[5] = "hello";
++char * wordcopy = NULL;
++char ** wordy = &wordcopy;
 +int letterplace = 0;
 +int morseplace = 0;
++int GEET = 1;
++int newword = 0;
++size_t sss;
+ 
+-struct heartbeat_trig_data {
++struct morse_trig_data {
+ 	unsigned int phase;
+ 	unsigned int period;
+ 	struct timer_list timer;
+ 	unsigned int invert;
++	long unsigned int blink_tick;
++	unsigned int blink_repeat;
++    char * message;   
+ };
+ 
+-static void led_heartbeat_function(unsigned long data)
 +
 +// This function was found at
 +// https://www.geeksforgeeks.org/morse-code-implementation/
 +char *  morseEncode(char x) { 
 +  switch (x) { 
 +  case 'a': 
++  case 'A': 
 +    return ".-"; 
 +  case 'b': 
++  case 'B': 
 +    return "-..."; 
 +  case 'c': 
++  case 'C': 
 +    return "-.-."; 
 +  case 'd': 
++  case 'D': 
 +    return "-.."; 
 +  case 'e': 
++  case 'E': 
 +    return "."; 
 +  case 'f': 
++  case 'F': 
 +    return "..-."; 
 +  case 'g': 
++  case 'G': 
 +    return "--."; 
 +  case 'h': 
++  case 'H': 
 +    return "...."; 
 +  case 'i': 
++  case 'I': 
 +    return ".."; 
 +  case 'j': 
++  case 'J': 
 +    return ".---"; 
 +  case 'k': 
++  case 'K': 
 +    return "-.-"; 
 +  case 'l': 
++  case 'L': 
 +    return ".-.."; 
 +  case 'm': 
++  case 'M': 
 +    return "--"; 
 +  case 'n': 
++  case 'N': 
 +    return "-."; 
 +  case 'o': 
++  case 'O': 
 +    return "---"; 
 +  case 'p': 
++  case 'P': 
 +    return ".--."; 
 +  case 'q': 
++  case 'Q': 
 +    return "--.-"; 
 +  case 'r': 
++  case 'R': 
 +    return ".-."; 
 +  case 's': 
++  case 'S': 
 +    return "..."; 
 +  case 't': 
++  case 'T': 
 +    return "-"; 
 +  case 'u': 
++  case 'U': 
 +    return "..-"; 
 +  case 'v': 
++  case 'V': 
 +    return "...-"; 
 +  case 'w': 
++  case 'W': 
 +    return ".--"; 
 +  case 'x': 
++  case 'X': 
 +    return "-..-"; 
 +  case 'y': 
++  case 'Y': 
 +    return "-.--"; 
 +  // for space 
++  case 'Z': 
 +  case 'z': 
 +    return "--.."; 
 +  default:
@@ -93,16 +148,107 @@
 +  } 
 +} 
 +
++ 
++static dev_t dev;
++static struct cdev c_dev;
++static struct class *cl;
++ 
++static int my_open(struct inode *i, struct file *f)
++{
++    printk("CS444 Dummy driver open\r\n");
++    return 0;
++}
++static int my_close(struct inode *i, struct file *f)
++{
++    printk("CS444 Dummy driver close\r\n");
++    return 0;
++}
 +
-+struct morse_trig_data {
- 	unsigned int phase;
- 	unsigned int period;
- 	struct timer_list timer;
- 	unsigned int invert;
-+	long unsigned int blink_tick;
- };
- 
--static void led_heartbeat_function(unsigned long data)
++static ssize_t dummy_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
++{
++    printk("CS444 Dummy driver read\r\n");
++    return strlen(buf);
++}
++
++static ssize_t dummy_write(struct file *file, const char __user *buf, size_t size, loff_t *ppos)
++{
++
++    // kfree(word);
++    wordcopy = kmalloc(size * sizeof(char), GFP_KERNEL);
++
++    letterplace = 0;
++    morseplace = 0;
++
++    GEET = 1;
++    if (copy_from_user(wordcopy, buf, size))
++        {
++            return -EACCES;
++        }
++
++    printk("%s\n", wordcopy);
++
++    return size;
++}
++ 
++static struct file_operations dummy_fops =
++{
++    .owner = THIS_MODULE,
++    .open = my_open,
++    .read = dummy_read,
++    .write = dummy_write,
++    .release = my_close
++};
++ 
++static int __init dummy_init(void)
++{
++    int ret;
++    struct device *dev_ret;
++ 
++    if ((ret = alloc_chrdev_region(&dev, FIRST_MINOR, MINOR_CNT, "morse")) < 0)
++    {
++        return ret;
++    }
++ 
++    cdev_init(&c_dev, &dummy_fops);
++ 
++    if ((ret = cdev_add(&c_dev, dev, MINOR_CNT)) < 0)
++    {
++        return ret;
++    }
++     
++
++    if (IS_ERR(cl = class_create(THIS_MODULE, "char")))
++    {
++        cdev_del(&c_dev);
++        unregister_chrdev_region(dev, MINOR_CNT);
++        return PTR_ERR(cl);
++    }
++    if (IS_ERR(dev_ret = device_create(cl, NULL, dev, NULL, "morse")))
++    {
++        class_destroy(cl);
++        cdev_del(&c_dev);
++        unregister_chrdev_region(dev, MINOR_CNT);
++        return PTR_ERR(dev_ret);
++    }
++
++    printk("CS444 Dummy Driver has been loaded!\r\n");
++ 
++    return 0;
++}
++ 
++static void __exit dummy_exit(void)
++{
++    device_destroy(cl, dev);
++    class_destroy(cl);
++    cdev_del(&c_dev);
++    unregister_chrdev_region(dev, MINOR_CNT);
++}
++ 
++module_init(dummy_init);
++module_exit(dummy_exit);
++
++
++
 +static void led_morse_function(unsigned long data)
  {
  	struct led_classdev *led_cdev = (struct led_classdev *) data;
@@ -114,14 +260,23 @@
 +    int space = 0;
 +    int i;
 +    int j;
++    int spacebar;
 +    char * code;
++    char * word;
++
++    printk("%s\n", *wordy);   
++    word = *wordy;
++    if(word == NULL){
++        word = kmalloc(6 * sizeof(char), GFP_KERNEL);   
++        word = "hello\0";
++    } 
  
 -	if (unlikely(panic_heartbeats)) {
 +	if (unlikely(panic_morses)) {
  		led_set_brightness_nosleep(led_cdev, LED_OFF);
  		return;
  	}
-@@ -46,63 +124,141 @@
+@@ -46,63 +274,139 @@
  	if (test_and_clear_bit(LED_BLINK_BRIGHTNESS_CHANGE, &led_cdev->work_flags))
  		led_cdev->blink_brightness = led_cdev->new_blink_brightness;
  
@@ -131,8 +286,12 @@
 +    i = letterplace;
 +    j = morseplace;    
 +
-+    code = morseEncode(word[i]);
++    spacebar = 0;
++    if((i < strlen(word)  - 1 && (word[i + 1] == '\0' || word[i + 1] == ' ')))
++        spacebar = 1;
 +
++
++    code = morseEncode(word[i]);
 +
 +    if(code[j] == '.')
 +        dot = 1;
@@ -163,8 +322,10 @@
 -		if (!heartbeat_data->invert)
 +        //printk("Case 0\n");
 +        morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 2);
-+        if(space)
++        if(space && !spacebar)
 +            morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 4);
++        else if(space && spacebar)
++            morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 8);
 +		delay = msecs_to_jiffies(morse_data->blink_tick);
 +		morse_data->phase++;
 +		if (!morse_data->invert)
@@ -177,11 +338,13 @@
 +    default:
 +        //printk("Case 1\n");
 +		delay = msecs_to_jiffies(morse_data->blink_tick);
-+        if(space)
++        if(space && !spacebar)
 +            delay = msecs_to_jiffies(morse_data->blink_tick * 3);
++        else if(space && spacebar)
++            delay = msecs_to_jiffies(morse_data->blink_tick * 7);
 +		morse_data->phase = 0;
 +        j++;
-+        if(j == strlen(code)){
++        if(j >= strlen(code)){
 +            j = 0;
 +            i++;
 +        }
@@ -200,8 +363,10 @@
 +        //printk("Case 2\n");
 +		// morse_data->period = msecs_to_jiffies(1000);
 +        morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 4);
-+        if(space)
++        if(space && !spacebar)
 +            morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 6);
++        else if(space && spacebar)
++            morse_data->period = msecs_to_jiffies(morse_data->blink_tick * 10);
 +		delay = msecs_to_jiffies(morse_data->blink_tick * 3);
 +		morse_data->phase++;
 +		if (!morse_data->invert)
@@ -214,11 +379,13 @@
 -		if (heartbeat_data->invert)
 +        //printk("Case Default\n");
 +		delay = msecs_to_jiffies(morse_data->blink_tick);
-+        if(space)
++        if(space && !spacebar)
 +            delay = msecs_to_jiffies(morse_data->blink_tick * 3);
++        else if(space && spacebar)
++            delay = msecs_to_jiffies(morse_data->blink_tick * 7);
 +		morse_data->phase = 0;
 +        j++;
-+        if(j == strlen(code)){
++        if(j >= strlen(code)){
 +            j = 0;
 +            i++;
 +        }
@@ -228,14 +395,26 @@
  	}
 +    }
 +
-+    if(i == strlen(word)){
-+        i = 0;
++    while(word[i] == ' ' || word[i] == '\0'){
++        i++;
++        if(i >= strlen(word)){
++            i = 0;
++            j = 0;
++            GEET = 0;
++        }
 +    }
-+
++    if(i >= strlen(word)){
++        i = 0;
++        j = 0;
++        GEET = 0;
++    }
++    
 +    letterplace = i;
 +    morseplace = j;
 +
 +
++    if(!GEET && !morse_data->blink_repeat)
++	    brightness = LED_OFF;
  
  	led_set_brightness_nosleep(led_cdev, brightness);
 -	mod_timer(&heartbeat_data->timer, jiffies + delay);
@@ -259,13 +438,14 @@
  	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 -	struct heartbeat_trig_data *heartbeat_data = led_cdev->trigger_data;
 +	struct morse_trig_data *morse_data = led_cdev->trigger_data;
-+	unsigned long state;
-+	int ret;
-+
-+	ret = kstrtoul(buf, 0, &state);
-+	if (ret)
-+		return ret;
-+
+ 	unsigned long state;
+ 	int ret;
+ 
+@@ -110,103 +414,179 @@
+ 	if (ret)
+ 		return ret;
+ 
+-	heartbeat_data->invert = !!state;
 +	morse_data->invert = !!state;
 +
 +	return size;
@@ -280,33 +460,60 @@
 +	return sprintf(buf, "%lu\n", morse_data->blink_tick);
 +}
 +
++static ssize_t led_repeat_show(struct device *dev,
++		struct device_attribute *attr, char *buf)
++{
++	struct led_classdev *led_cdev = dev_get_drvdata(dev);
++	struct morse_trig_data *morse_data = led_cdev->trigger_data;
++
++	return sprintf(buf, "%u\n", morse_data->blink_repeat);
++}
++
++
 +static ssize_t led_tick_store(struct device *dev,
 +		struct device_attribute *attr, const char *buf, size_t size)
 +{
 +	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 +	struct morse_trig_data *morse_data = led_cdev->trigger_data;
- 	unsigned long state;
- 	int ret;
- 
-@@ -110,103 +266,115 @@
- 	if (ret)
- 		return ret;
- 
--	heartbeat_data->invert = !!state;
++	unsigned long state;
++	int ret;
++
++	ret = kstrtoul(buf, 0, &state);
++	if (ret)
++		return ret;
++
 +	morse_data->blink_tick = state;
++
++	return size;
++}
++
++static ssize_t led_repeat_store(struct device *dev,
++		struct device_attribute *attr, const char *buf, size_t size)
++{
++	struct led_classdev *led_cdev = dev_get_drvdata(dev);
++	struct morse_trig_data *morse_data = led_cdev->trigger_data;
++	unsigned long state;
++	int ret;
++
++	ret = kstrtoul(buf, 0, &state);
++	if (ret)
++		return ret;
++
++	morse_data->blink_repeat = state;
  
  	return size;
  }
  
  static DEVICE_ATTR(invert, 0644, led_invert_show, led_invert_store);
 +static DEVICE_ATTR(tick, 0644, led_tick_show, led_tick_store);
++static DEVICE_ATTR(repeat, 0644, led_repeat_show, led_repeat_store);
  
 -static void heartbeat_trig_activate(struct led_classdev *led_cdev)
 +static void morse_trig_activate(struct led_classdev *led_cdev)
  {
 -	struct heartbeat_trig_data *heartbeat_data;
-+	struct morse_trig_data *morse_data;
  	int rc;
++    struct morse_trig_data *morse_data;
  
 -	heartbeat_data = kzalloc(sizeof(*heartbeat_data), GFP_KERNEL);
 -	if (!heartbeat_data)
@@ -333,7 +540,15 @@
 +		return;
 +	}
 +
++	rc = device_create_file(led_cdev->dev, &dev_attr_repeat);
++	if (rc) {
++		kfree(led_cdev->trigger_data);
++		return;
++	}
++
 +    morse_data->blink_tick = DEFAULT_TICK;
++    morse_data->blink_repeat = 1;
++    GEET = 1;
 +
 +	setup_timer(&morse_data->timer,
 +		    led_morse_function, (unsigned long) led_cdev);
@@ -358,6 +573,7 @@
  		device_remove_file(led_cdev->dev, &dev_attr_invert);
 -		kfree(heartbeat_data);
 +		device_remove_file(led_cdev->dev, &dev_attr_tick);
++		device_remove_file(led_cdev->dev, &dev_attr_repeat);
 +		kfree(morse_data);
  		clear_bit(LED_BLINK_SW, &led_cdev->work_flags);
  		led_cdev->activated = false;
@@ -424,6 +640,7 @@
 +static void __exit morse_trig_exit(void)
  {
 -	unregister_reboot_notifier(&heartbeat_reboot_nb);
++    // kfree(word);
 +	unregister_reboot_notifier(&morse_reboot_nb);
  	atomic_notifier_chain_unregister(&panic_notifier_list,
 -					 &heartbeat_panic_nb);
