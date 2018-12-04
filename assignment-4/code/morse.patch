@@ -1,5 +1,5 @@
 --- ledtrig-heartbeat.c	2018-11-08 15:48:12.073613171 -0800
-+++ ledtrig-morse.c	2018-11-26 23:03:21.181351659 -0800
++++ ledtrig-morse.c	2018-12-03 14:05:39.006277148 -0800
 @@ -1,10 +1,13 @@
  /*
 - * LED Heartbeat Trigger
@@ -17,7 +17,7 @@
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of the GNU General Public License version 2 as
-@@ -17,28 +20,253 @@
+@@ -17,28 +20,259 @@
  #include <linux/slab.h>
  #include <linux/timer.h>
  #include <linux/sched.h>
@@ -155,18 +155,18 @@
 + 
 +static int my_open(struct inode *i, struct file *f)
 +{
-+    printk("CS444 Dummy driver open\r\n");
++    //printk("CS444 Dummy driver open\r\n");
 +    return 0;
 +}
 +static int my_close(struct inode *i, struct file *f)
 +{
-+    printk("CS444 Dummy driver close\r\n");
++    //printk("CS444 Dummy driver close\r\n");
 +    return 0;
 +}
 +
 +static ssize_t dummy_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 +{
-+    printk("CS444 Dummy driver read\r\n");
++    //printk("CS444 Dummy driver read\r\n");
 +    return strlen(buf);
 +}
 +
@@ -174,18 +174,26 @@
 +{
 +
 +    // kfree(word);
-+    wordcopy = kmalloc(size * sizeof(char), GFP_KERNEL);
++    //wordcopy = kmalloc(size * sizeof(char), GFP_KERNEL);
++
++    kfree(wordcopy);
++
++    wordcopy = kstrndup(buf, size, GFP_KERNEL);
 +
 +    letterplace = 0;
 +    morseplace = 0;
 +
++   sss = size;
++
 +    GEET = 1;
++    /*
 +    if (copy_from_user(wordcopy, buf, size))
 +        {
 +            return -EACCES;
 +        }
++    */
 +
-+    printk("%s\n", wordcopy);
++    //printk("%s\n", wordcopy);
 +
 +    return size;
 +}
@@ -231,7 +239,7 @@
 +        return PTR_ERR(dev_ret);
 +    }
 +
-+    printk("CS444 Dummy Driver has been loaded!\r\n");
++    //printk("CS444 Dummy Driver has been loaded!\r\n");
 + 
 +    return 0;
 +}
@@ -264,11 +272,9 @@
 +    char * code;
 +    char * word;
 +
-+    printk("%s\n", *wordy);   
-+    word = *wordy;
++    word = kstrndup(*wordy, sss, GFP_KERNEL);
 +    if(word == NULL){
-+        word = kmalloc(6 * sizeof(char), GFP_KERNEL);   
-+        word = "hello\0";
++        word = kstrndup("hello\0", 64, GFP_KERNEL);
 +    } 
  
 -	if (unlikely(panic_heartbeats)) {
@@ -276,7 +282,7 @@
  		led_set_brightness_nosleep(led_cdev, LED_OFF);
  		return;
  	}
-@@ -46,63 +274,139 @@
+@@ -46,63 +280,193 @@
  	if (test_and_clear_bit(LED_BLINK_BRIGHTNESS_CHANGE, &led_cdev->work_flags))
  		led_cdev->blink_brightness = led_cdev->new_blink_brightness;
  
@@ -287,7 +293,7 @@
 +    j = morseplace;    
 +
 +    spacebar = 0;
-+    if((i < strlen(word)  - 1 && (word[i + 1] == '\0' || word[i + 1] == ' ')))
++    if((i < strlen(word)  - 1 && (word[i + 1] == '\n' ||  word[i + 1] == '\0' || word[i + 1] == ' ')))
 +        spacebar = 1;
 +
 +
@@ -395,18 +401,19 @@
  	}
 +    }
 +
-+    while(word[i] == ' ' || word[i] == '\0'){
++    if(i >= strlen(word)){
++        i = 0;
++        j = 0;
++        GEET = 0;
++    }
++
++    while(word[i] == ' ' || word[i] == '\0' || word[i] == '\n'){
 +        i++;
 +        if(i >= strlen(word)){
 +            i = 0;
 +            j = 0;
 +            GEET = 0;
 +        }
-+    }
-+    if(i >= strlen(word)){
-+        i = 0;
-+        j = 0;
-+        GEET = 0;
 +    }
 +    
 +    letterplace = i;
@@ -438,14 +445,13 @@
  	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 -	struct heartbeat_trig_data *heartbeat_data = led_cdev->trigger_data;
 +	struct morse_trig_data *morse_data = led_cdev->trigger_data;
- 	unsigned long state;
- 	int ret;
- 
-@@ -110,103 +414,179 @@
- 	if (ret)
- 		return ret;
- 
--	heartbeat_data->invert = !!state;
++	unsigned long state;
++	int ret;
++
++	ret = kstrtoul(buf, 0, &state);
++	if (ret)
++		return ret;
++
 +	morse_data->invert = !!state;
 +
 +	return size;
@@ -492,13 +498,14 @@
 +{
 +	struct led_classdev *led_cdev = dev_get_drvdata(dev);
 +	struct morse_trig_data *morse_data = led_cdev->trigger_data;
-+	unsigned long state;
-+	int ret;
-+
-+	ret = kstrtoul(buf, 0, &state);
-+	if (ret)
-+		return ret;
-+
+ 	unsigned long state;
+ 	int ret;
+ 
+@@ -110,103 +474,126 @@
+ 	if (ret)
+ 		return ret;
+ 
+-	heartbeat_data->invert = !!state;
 +	morse_data->blink_repeat = state;
  
  	return size;
