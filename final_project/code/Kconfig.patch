@@ -1,0 +1,15 @@
+--- Kconfig	2018-11-12 20:02:15.622998366 -0800
++++ Kconfignew	2018-11-12 20:02:02.422769599 -0800
+@@ -58,6 +58,12 @@
+ 	  load average.
+ 	  If unsure, say Y.
+ 
++config LEDS_TRIGGER_MORSE
++	tristate "LED Morse Trigger"
++	depends on LEDS_TRIGGERS
++	help
++      Morse stuff.
++
+ config LEDS_TRIGGER_BACKLIGHT
+ 	tristate "LED backlight Trigger"
+ 	depends on LEDS_TRIGGERS
