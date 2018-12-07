@@ -33,11 +33,11 @@
 Being able to build a kernel for the Raspberry PI, and also being able to modify GPIO pins in order to send and receive morse code between other Raspberry PIs with the same functionality. Another point for the project was being able to change the speeds at which the morse code is being transmitted or received individually. It is important to know how to create and modify drivers when working with kernels. \\
 
 \noindent \textbf{2. How did you personally approach the problem? Design decisions, algorithm, etc.}
-We took some contents from the morse trigger, modified and added a few things, and created our own driver that uses GPIO pins to send and receive morse code. We had to modify the Makefile and Kconfig in order to accommodate our driver when building the kernel. We also had to create a file called \verb|morsegpio.c| which was the morse driver code itself. \\
+We took some contents from the morse trigger, modified and added a few things, and created our own driver that uses GPIO pins to send and receive morse code. We had to modify the Makefile and Kconfig in order to accommodate our driver when building the kernel. We also had to create a file called \verb|morsegpio.c| which was the morse driver code itself. Our output is almost the same as the trigger, whereas the input checks every 1/4 of elapsed time to ensure the signal state. \\
 
 
 \noindent \textbf{3. How did you ensure your solution was correct? Testing details, for instance.}
-We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function, but later on we figured out how to. When it came to testing if the transmitter pin and receiver pin are working correctly, we had to build the kernel every time to check and see if the morse codes for inputs strings were correct, as well as the speeds were reflected by changes requested to the SYSfs system. In order to test the requested pins, we tried different GPIO pins for the transmission and reception to see if the morse code still works. We also tried different strings with various lengths, mixture of upper-case and lower-case letters, and using different characters besides the alphabet. \\
+We started out by using print statements to see if the kernel was built and running properly. We then realized that we couldn't get anything to print to the console, even though we used the right function, but later on we figured out how to. When it came to testing if the transmitter pin and receiver pin are working correctly, we had to build the kernel every time to check and see if the morse codes for inputs strings were correct, as well as the speeds were reflected by changes requested to the SYSfs system. In order to test the requested pins, we tried different GPIO pins for the transmission and reception to see if the morse code still works. We also tried different strings with various lengths, mixture of upper-case and lower-case letters. \\
 
 
 \noindent \textbf{4. What did you learn?}
@@ -50,19 +50,39 @@ We learned how to build a Raspberry PI kernel. Specifically, we were able to cre
 \item Flash the Raspbian OS onto the SD card for the Raspberry PI using Etcher
 \item Open the root directory of the SD card (by plugging it into its USB thingy and into your machine) and add \verb|kernel=kernel8.img| and \verb|enable_uart=1| to the config.txt file.
 \item Ensure that the "code" directory is in the same directory as the "linux" directory. If no linux directory exists, it will get created in the directory above the present working directory.
-\item Run the "builder" script to build and patch the kernel. If you get any prompts from the patcher, answer no ("n"). This means that you have previously built and are trying to build again, but the patcher will think to reverse the changes. 
-\item The image will be outside the linux directory (in the same directory as where "linux" and "code" are housed). It will be called "kernel8.img"
+\item Ensure that the builder script can modify files in the linux directory. Do \verb|chmod +777 -R linux| to ensure that the there are full permissions. Also do \verb|chmod +777 -R code| to ensure that everything can run and be moved around in the code directory that we have included.
+\item Run the "builder" script to build the kernel. If you get any prompts from the patcher, answer no ("n"). This means that you have previously built and are trying to build again, but the patcher will think to reverse the changes.
+\item Ensure that the \verb|.config| file has the appropriate resource written to it. 
+\item Do \verb|make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- menuconfig| 
+\item Go to \verb|device drivers -> Character devices -> CLICK ON ME BOI| and hit "Y" to select the option. It should have a * next to it. Then, hit "Save", and hit "ok". Then, press exit until you are out of the menu screen. 
+\item Then run \verb|make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all| again.
 \item Copy the "kernel8.img" to the SD card \\
 \end{enumerate}
 
-Here is how we created the patches (but you DO NOT NEED TO DO THIS TO RUN OUR CODE!)
+NOTE: THERE ARE NO PATCH FILES. We wanted you guys to be able to see all the source code, so we have the four files that were pertinent to the project, and nothing else. The builder script will handle (almost) everything.
+
+To test our project quickly, you can do the following:
+
 \begin{enumerate}
-\item After finishing our work on the \verb|morsegpio.c| file, we did \verb|diff -u ledtrig-morse.c morsegpio.c > morsegpio.patch| to produce the \verb|morsegpio.patch| file. 
-\item We made a copy of the Makefile (in the trigger directory) and called it Makefileold. We modified the Makefile as necessary. Then we did \verb|diff -u Makefileold Makefile > Makefile.patch| to produce the \verb|Makefile.patch| file.
-\item We made a copy of the Kconfig (in the trigger directory) and called it Kconfigold. We modified the Kconfig as necessary. Then we did \verb|diff -u Kconfigold Kconfig > Kconfig.patch| to produce the \verb|Kconfig.patch| file.
+\item Hook up a female-female jumper wire to GPIO pins 23 and 24. By default, the OUT pin is 24 and the IN pin is 23. 
+\item Boot up the Kernel. Log in.
+\item Do \verb| sudo su| so that you are the superuser.
+\item Do \verb| echo [your-word-here] > /dev/morsegpio|
+\item Do \verb| cat /dev/morsegpio|
 \end{enumerate}
 
+You should see your word printed out over and over. To stop reading, hit CTRL + C. To change the word that is being transmitted, echo a new word to /dev/morsegpio. Other notes of the features:
 
+\begin{itemize}
+\item We use SysFs for the options.
+\item To change the input speed reception, do \verb|echo [speed-in-ms] > /sys/class/char/morsegpio/in-speed|. Please keep the input speed a multiple of 4. (This is for Nyquist reasons). By default, the speed is 100ms.
+\item To change the out speed reception, do \verb|echo [speed-in-ms] > /sys/class/char/morsegpio/out-speed|. By default, the speed is 100ms.
+\item To change the input pin, do \verb|echo [pin #] > /sys/class/char/morsegpio/in-pin|
+\item To change the output pin, do \verb|echo [pin #] > /sys/class/char/morsegpio/out-pin|
+\item A "?" symbol may be printed early on, which indicates an unrecognized character. This may happen due to the read starting in the middle of a morse code being transmitted. The morse code will be transmitted ceaselessly.
+\end{itemize}
+
+Please contact us at martinb3@oregonstate.edu and londuran@oregonstate.edu for any questions regarding setting up our project or issues.
 
 \section{Version Control Log}
 

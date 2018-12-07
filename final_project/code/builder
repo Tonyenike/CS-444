@@ -23,11 +23,13 @@ KERNEL=kernel8
 make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcmrpi3_defconfig
 make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
 
-rm -rf ./drivers/leds/trigger/ledtrig-morse.c
+rm -f ./drivers/char/Makefile
+rm -f ./drivers/char/Kconfig
 
-patch ./drivers/leds/trigger/Kconfig ${YEET}/${BASEDIR}/Kconfig.patch
-patch ./drivers/leds/trigger/Makefile ${YEET}/${BASEDIR}/Makefile.patch
-patch ./drivers/leds/trigger/ledtrig-heartbeat.c -i ${YEET}/${BASEDIR}/morse.patch -o ./drivers/leds/trigger/ledtrig-morse.c
+cp ${YEET}/${BASEDIR}/Kconfig ./drivers/char/Kconfig
+cp ${YEET}/${BASEDIR}/Makefile ./drivers/char/Makefile
+cp ${YEET}/${BASEDIR}/morsegpio.c ./drivers/char/morsegpio.c
+cp ${YEET}/${BASEDIR}/morsegpio.h ./drivers/char/morsegpio.h
 
 KERNEL=kernel8
 make -j4 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
